@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import {ChatPage} from './pages/chatpage'
+import {ChatPage,generateanswer} from './pages/chatpage'
 
 function App() {
   return <ChatPage />;
