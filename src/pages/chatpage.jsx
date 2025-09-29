@@ -1,16 +1,18 @@
 import React from "react";
 import axios from "axios";
 
+const apiKey = import.meta.env.VITE_API_KEY_GEMINI;
 
 
 
 export async function generateanswer(question,setAnswer){
     setAnswer("called");
+    console.log(apiKey);
     
     
     
     const response = await axios ({
-        url: "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=AIzaSyBBtmEoJWHyikDVYZ7H-ObTbvX6r3Z6ZZM",
+        url: `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
         method: "POST",
         data: {
             contents:[
