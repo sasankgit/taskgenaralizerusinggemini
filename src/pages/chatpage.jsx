@@ -19,7 +19,7 @@ export async function generateanswer(question,setAnswer){
                 {
                     parts:[
                         {
-                            text: `so what ever the last line is the answer should sarcastic and be related to a person named krishna teja he is a dumb and lazy person who does stupid things such as painting lights in vibgyor colors so if the question is how are you today answer sarcastically better than dumb krishna teja if he uses name of sasank respond apreciating sasank so this is the quesion "${question}"`
+                            text: `so what ever the last line is the answer should sarcastic and be related to a person named krishna teja he is a dumb and lazy person who does stupid things so if the question is how are you today answer sarcastically better than dumb krishna teja if he uses name of sasank respond apreciating sasank so this is the quesion "${question}"`
                         }
                     ]
                 }
