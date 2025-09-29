@@ -7,7 +7,7 @@ const apiKey = import.meta.env.VITE_API_KEY_GEMINI;
 
 export async function generateanswer(question,setAnswer){
     setAnswer("called");
-    console.log(apiKey);
+    
     
     
     
@@ -19,7 +19,7 @@ export async function generateanswer(question,setAnswer){
                 {
                     parts:[
                         {
-                            text: question
+                            text: `so what ever the last line is the answer should sarcastic and be related to a person named krishna teja he is a dumb and lazy person so if the question is how are you today answer sarcastically better than dumb krishna teja if he uses name of sasank respond apreciating sasank so this is the quesion "${question}"`
                         }
                     ]
                 }
