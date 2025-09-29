@@ -55,7 +55,7 @@ export function ChatPage(){
               placeholder="Type your message here..."
             />
             <button onClick = {handleclick} className= "bg-blue-500 text-white px-4">button</button>
-            <pre>{answer}</pre>
+            <p>{answer}</p>
         </div>
     );
 };
