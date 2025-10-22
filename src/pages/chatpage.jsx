@@ -58,4 +58,5 @@ export function ChatPage(){
             <p>{answer}</p>
         </div>
     );
-};
+}
+export default ChatPage
