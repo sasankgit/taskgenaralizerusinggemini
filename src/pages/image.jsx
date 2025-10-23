@@ -1,191 +1,90 @@
 import React, { useState } from 'react';
-import { supabase } from '../supabase'; // Import your client
+import { supabase } from '../supabase';
 
-function ImageUpload() {
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
+export default function ImageUpload() {
+  const [personName, setPersonName] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [status, setStatus] = useState('');
+  const [user, setUser] = useState(null);
 
-  /**
-   * Handles the file input change event.
-   */
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const selectedFile = e.target.files[0];
-      console.log('File selected:', selectedFile); // DEBUG
-      setFile(selectedFile);
-      setError(null);
-      setSuccessMessage('');
-    } else {
-      console.log('File selection cancelled.'); // DEBUG
-      setFile(null);
-    }
-  };
+  // Fetch current user
+  React.useEffect(() => {
+    const getUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) console.error(error);
+      else setUser(data.user);
+    };
+    getUser();
+  }, []);
 
-  /**
-   * Handles the file upload to Supabase Storage.
-   */
   const handleUpload = async () => {
-    console.log('handleUpload triggered'); // DEBUG
-
-    if (!file) {
-      const errorMsg = 'You must select an image to upload.';
-      console.error(errorMsg); // DEBUG
-      setError(errorMsg);
+    if (!user) {
+      setStatus('Please log in first.');
       return;
     }
 
-    console.log('Setting uploading state to true'); // DEBUG
-    setUploading(true);
-    setError(null);
-    setSuccessMessage('');
+    if (!personName || !imageFile) {
+      setStatus('Please enter a name and select an image.');
+      return;
+    }
 
-    try {
-      const filePath = `public/${file.name}`;
-      console.log(`Attempting to upload to bucket: 'images', path: ${filePath}`); // DEBUG
+    const imageName = `${Date.now()}_${imageFile.name}`;
 
-      // Upload the file to the 'images' bucket
-      const { data, error: uploadError } = await supabase.storage
-        .from('images') // !! Make sure 'images' matches your bucket name
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false, 
-        });
+    // Upload to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from('images')
+      .upload(imageName, imageFile);
 
-      if (uploadError) {
-        console.error('Supabase upload error:', uploadError); // DEBUG
-        throw uploadError;
-      }
+    if (uploadError) {
+      console.error(uploadError);
+      setStatus('Image upload failed.');
+      return;
+    }
 
-      console.log('Upload successful, data:', data); // DEBUG
+    // Insert metadata into Supabase table
+    const { error: dbError } = await supabase.from('uploads').insert([
+      {
+        user_id: user.id,
+        person_name: personName,
+        image_name: imageName,
+      },
+    ]);
 
-      // Get the public URL for the uploaded file
-      const { data: publicUrlData } = supabase.storage
-        .from('images')
-        .getPublicUrl(data.path);
-
-      console.log('Public URL data:', publicUrlData); // DEBUG
-
-      if (!publicUrlData) {
-        throw new Error('Could not get public URL.');
-      }
-
-      const publicUrl = publicUrlData.publicUrl;
-      setSuccessMessage(`File uploaded successfully! URL: ${publicUrl}`);
-      console.log(`Success! URL: ${publicUrl}`); // DEBUG
-
-      setFile(null); // Clear the file
-      // Find the file input element by its ID and reset it
-      const fileInput = document.getElementById('file-input');
-      if (fileInput) {
-        fileInput.value = null; // This clears the file input field
-      }
-      
-    } catch (err) {
-      console.error('Upload failed:', err.message); // DEBUG
-      
-      if (err.message?.includes('Duplicate')) {
-        setError('Upload failed: A file with this name already exists.');
-      } else if (err.message?.includes('policy')) {
-        setError('Upload failed: Storage policy violation. Check your RLS policies.');
-      } else {
-        setError(`Upload failed: ${err.message}`);
-      }
-    } finally {
-      console.log('Setting uploading state to false'); // DEBUG
-      setUploading(false);
+    if (dbError) {
+      console.error(dbError);
+      setStatus('Database insert failed.');
+    } else {
+      setStatus('✅ Upload successful!');
+      setPersonName('');
+      setImageFile(null);
     }
   };
 
-  // Check the state of the button's disabled logic
-  const isButtonDisabled = uploading || !file;
-  // console.log(`Button disabled: ${isButtonDisabled} (uploading: ${uploading}, file: ${file ? 'exists' : 'null'})`); // DEBUG (this one is noisy)
-
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h2>Upload Image to Supabase</h2>
-      
-      {/* This is the actual file input. We hide it with 'display: none'.
-        The 'id' is crucial for the <label> to find it.
-      */}
-      <input
-        type="file"
-        id="file-input"
-        accept="image/png, image/jpeg"
-        onChange={handleFileChange}
-        disabled={uploading}
-        style={{ display: 'none' }} // Hide the default input
-      />
-      
-      {/* This <label> is styled to look like a button. 
-        Clicking it will trigger the hidden file input above.
-      */}
-      <label 
-        htmlFor="file-input" 
-        style={{
-          backgroundColor: '#007bff',
-          color: 'white',
-          padding: '8px 12px',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontFamily: 'Arial, sans-serif',
-          fontSize: '14px',
-          display: 'inline-block',
-          marginRight: '10px',
-          opacity: uploading ? 0.5 : 1, // Visually disable if uploading
-          pointerEvents: uploading ? 'none' : 'auto', // Prevent clicks while uploading
-        }}
-      >
-        Select File
-      </label>
-
-      {/* This is the original upload button. 
-        We'll style it similarly for consistency.
-      */}
-      <button 
-        onClick={handleUpload} 
-        disabled={isButtonDisabled}
-        style={{
-          backgroundColor: isButtonDisabled ? '#ccc' : '#28a745',
-          color: 'white',
-          padding: '8px 12px',
-          borderRadius: '4px',
-          border: 'none',
-          cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
-          fontFamily: 'Arial, sans-serif',
-          fontSize: '14px',
-        }}
-      >
-        {uploading ? 'Uploading...' : 'Upload'}
-      </button>
-
-      {/* Show the selected file name */}
-      {file && !successMessage && (
-        <p style={{ marginTop: '10px' }}>
-          Selected file: {file.name}
-        </p>
-      )}
-
-      {/* Show error message */}
-      {error && (
-        <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>
-      )}
-
-      {/* Show success message */}
-      {successMessage && (
-        <div style={{ color: 'green', marginTop: '10px' }}>
-          <p>{successMessage}</p>
-          <img 
-            src={successMessage.split('URL: ')[1]} 
-            alt="Uploaded" 
-            style={{ maxWidth: '300px', marginTop: '10px' }} 
-          />
-        </div>
-      )}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+      <h1 className="text-4xl font-bold mb-6">Upload an Image</h1>
+      <div className="bg-gray-800 p-8 rounded-xl shadow-lg w-96">
+        <input
+          type="text"
+          placeholder="Enter person name"
+          value={personName}
+          onChange={(e) => setPersonName(e.target.value)}
+          className="w-full mb-4 p-2 rounded bg-gray-700 text-white"
+        />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImageFile(e.target.files[0])}
+          className="w-full mb-4"
+        />
+        <button
+          onClick={handleUpload}
+          className="bg-purple-500 w-full py-2 rounded font-semibold hover:bg-purple-600 transition"
+        >
+          Upload
+        </button>
+        <p className="mt-4 text-sm text-center text-gray-400">{status}</p>
+      </div>
     </div>
   );
 }
-
-export default ImageUpload;
-
