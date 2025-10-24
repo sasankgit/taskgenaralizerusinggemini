@@ -1,5 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router-dom'
+import { supabase } from '../supabase';
+
  
 // SVG Icons as React Components for clarity
 const ZapIcon = () => (
@@ -25,6 +27,24 @@ const LayersIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16v4m-2-2h4m5 16v4m-2-2h4M12 3v18"></path>
   </svg>
 );
+
+async function Handlelogout(){
+  try {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Error logging out:', error.message);
+      // Optionally: Show an error message to the user
+    } else {
+      console.log('User logged out successfully');
+      // Optionally: Redirect the user to the login page or homepage
+      // window.location.href = '/login'; 
+    }
+  } catch (err) {
+    console.error('An unexpected error occurred:', err.message);
+  }
+
+}
 
 
 // Main App Component
@@ -61,15 +81,20 @@ export default function Home() {
               the gemini api page
             </button>
             </Link>
+            <Link to = '/summary'>
+            <button className='text-blue-200 bg-purple-400 rounded-4xl p-5'
+            
+            >
+              Image summarizer
+            </button>
+            </Link>
             
             {/* Navbar Buttons */}
             <nav className="flex items-center space-x-4">
-              <a href="#" className="bg-white/10 backdrop-blur-md text-white font-semibold py-2 px-5 rounded-full hover:bg-white/20 transition-all duration-300 ease-in-out transform hover:scale-105">
-                Log In
+              <a onClick={Handlelogout} className="bg-white/10 backdrop-blur-md text-white font-semibold py-2 px-5 rounded-full hover:bg-white/20 transition-all duration-300 ease-in-out transform hover:scale-105">
+                Log out
               </a>
-              <a href="#" className="bg-white text-gray-900 font-semibold py-2 px-5 rounded-full hover:bg-gray-200 transition-all duration-300 ease-in-out transform hover:scale-105">
-                Sign Up
-              </a>
+              
             </nav>
           </div>
         </header>

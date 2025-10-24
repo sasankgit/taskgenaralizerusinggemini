@@ -1,4 +1,4 @@
-import './index.css'
+import './custom.css'
   import { useState, useEffect } from 'react'
   import { supabase } from './supabase.js';
   import { Auth } from '@supabase/auth-ui-react'
@@ -10,6 +10,7 @@ import './index.css'
   import Home from "./pages/home"
   import ImageUpload from './pages/image'
   import ChatPage from './pages/chatpage.jsx';
+  import ImageSummarizer from './pages/summarizer.jsx'
 
 
 
@@ -49,6 +50,7 @@ import './index.css'
             <Route path='/' element ={<Home/>}/>
             <Route path='/image' element={<ImageUpload/>}/>
             <Route path='/gemini' element={<ChatPage/>}/>
+            <Route path='/summary' element={<ImageSummarizer/>}/>
 
           </Routes>
         </BrowserRouter>
