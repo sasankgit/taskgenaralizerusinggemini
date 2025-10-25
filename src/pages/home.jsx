@@ -88,6 +88,13 @@ export default function Home() {
               Image summarizer
             </button>
             </Link>
+            <Link to = '/3dpage'>
+            <button className='text-blue-200 bg-purple-400 rounded-4xl p-5'
+            
+            >
+              threejspage
+            </button>
+            </Link>
             
             {/* Navbar Buttons */}
             <nav className="flex items-center space-x-4">

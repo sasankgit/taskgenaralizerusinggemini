@@ -11,6 +11,9 @@ import './custom.css'
   import ImageUpload from './pages/image'
   import ChatPage from './pages/chatpage.jsx';
   import ImageSummarizer from './pages/summarizer.jsx'
+  import Three from './pages/threejs.jsx'
+
+
 
 
 
@@ -51,6 +54,7 @@ import './custom.css'
             <Route path='/image' element={<ImageUpload/>}/>
             <Route path='/gemini' element={<ChatPage/>}/>
             <Route path='/summary' element={<ImageSummarizer/>}/>
+            <Route path='/3dpage' element={<Three/>}/>
 
           </Routes>
         </BrowserRouter>
